@@ -697,7 +697,16 @@
       </div>
 
       <div class="settings-section">
-        <div class="settings-section-title"><span data-icon="info"></span>️ معلومات النظام</div>
+        <div class="settings-section-title"><span data-icon="info"></span> معلومات النظام</div>
+        
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>تحديث التطبيق</h4>
+            <p>اضغط لتنزيل أحدث التعديلات بدون حذف بياناتك</p>
+          </div>
+          <button class="btn-primary btn-sm" onclick="checkForUpdates()"><span data-icon="download"></span> تحديث</button>
+        </div>
+
         <div class="settings-item">
           <div class="settings-item-info">
             <h4>الإصدار</h4>
@@ -2054,6 +2063,26 @@ function clearAllData() {
   renderHome();
   renderStudentsTable();
   toast('<span data-icon="trash"></span> تم مسح كل البيانات');
+}
+
+function checkForUpdates() {
+  toast('<span data-icon="sparkles"></span> جاري تحديث التطبيق...');
+  if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+              registration.unregister();
+          }
+          setTimeout(() => {
+              window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+          }, 800);
+      }).catch(err => {
+          window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+      });
+  } else {
+      setTimeout(() => {
+          window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+      }, 800);
+  }
 }
 
 // ============================================================
