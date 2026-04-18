@@ -230,7 +230,7 @@
   .cal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
   .cal-nav-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text); display: flex; align-items: center; justify-content: center; cursor:pointer; font-size:18px; }
   .cal-title { font-size: 18px; font-weight: 700; color: var(--gold); }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 16px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; padding: 16px; }
   .cal-day-name { text-align: center; font-size: 12px; color: var(--text-dim); font-weight: 700; padding: 8px 0; }
   .cal-day {
     aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -238,7 +238,7 @@
   }
   .cal-day:hover { background: rgba(255,255,255,0.05); }
   .cal-day.today { background: rgba(201,150,58,0.2); color: var(--gold); border:1px solid rgba(201,150,58,0.4); }
-  .cal-day.has-payments::after { content: ''; position: absolute; bottom: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .cal-pay-amount { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 9.5px; font-weight: 800; color: var(--green); line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; }
   .cal-day.empty { cursor: default; }
   .cal-day.other-month { opacity: 0.3; }
   .calendar-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
@@ -332,7 +332,8 @@
   .icon svg, [data-icon] svg { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
   @media (max-width: 600px) {
-    .month-cards, .revenue-overview, .calendar-actions, .form-row { grid-template-columns: 1fr; }
+    .calendar-actions, .form-row { grid-template-columns: 1fr; }
+    .month-cards, .revenue-overview { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .page { padding: 0 16px 30px; }
@@ -435,6 +436,9 @@
           <tbody id="recent-payments-body"></tbody>
         </table>
       </div>
+    </div>
+    <div style="text-align:center; padding: 24px 16px 8px; color: var(--text-dim); font-size: 14px; font-weight: 600; line-height: 1.8; opacity: 0.85;">
+      اي خدمه يعم عبده ادعي لابنك بقى ❤️
     </div>
   </div>
 
@@ -799,8 +803,9 @@
       </div>
       <div class="form-group">
         <label class="form-label">الشهر الذي يغطيه هذا الدفع</label>
+        <div class="text-dim" style="font-size:12px;margin-bottom:6px">يمكن تحديد أكثر من شهر لتقسيم المبلغ عليهم</div>
         <div style="display:flex;gap:8px;">
-          <select class="form-control" id="pay-month-covered" style="flex:1">
+          <select class="form-control" id="pay-month-covered" style="flex:1" multiple size="4">
             <option value="1">يناير</option><option value="2">فبراير</option>
             <option value="3">مارس</option><option value="4">أبريل</option>
             <option value="5">مايو</option><option value="6">يونيو</option>
@@ -1032,7 +1037,10 @@ function renderHome() {
   const paidThisMonth = new Set(
     payments.filter(p => p.monthCovered == thisMonth && p.yearCovered == thisYear).map(p => p.studentId)
   );
-  const unpaidStudents = students.filter(s => !paidThisMonth.has(s.id));
+  const unpaidStudents = students.filter(s => {
+      const amt = payments.filter(p => p.studentId === s.id && String(p.monthCovered) == String(thisMonth) && String(p.yearCovered) == String(thisYear)).reduce((sum, p) => sum + p.amount, 0);
+      return amt < s.fee;
+  });
   const unpaidCount = unpaidStudents.length;
 
   document.getElementById('stats-grid').innerHTML = `
@@ -1312,17 +1320,31 @@ function renderUnpaidPage() {
   const y = now.getFullYear();
   const students = DB.students;
   const payments = DB.payments;
-  const paidThisMonth = new Set(
-    payments.filter(p => p.monthCovered == m && p.yearCovered == y).map(p => p.studentId)
-  );
-  const unpaid = students.filter(s => !paidThisMonth.has(s.id));
-  const dueTotal = unpaid.reduce((sum, s) => sum + (Number(s.fee) || 0), 0);
-  const paidCount = students.length - unpaid.length;
+
+  const unpaidItems = [];
+  let dueTotal = 0;
+
+  students.forEach(s => {
+      const paidThisMonthAmt = payments.filter(p => p.studentId === s.id && String(p.monthCovered) == String(m) && String(p.yearCovered) == String(y)).reduce((sum, p) => sum + p.amount, 0);
+      
+      if (paidThisMonthAmt < s.fee) {
+          const paidMonths = payments.filter(p => p.studentId === s.id && p.amount > 0).map(p => p.monthCovered);
+          const uniquePaid = [...new Set(paidMonths)].sort((a,b) => a - b);
+          unpaidItems.push({ 
+              student: s, 
+              paidMonthNames: uniquePaid.length ? uniquePaid.map(x => MONTHS_AR[x-1]).join('، ') : 'لا يوجد', 
+              owed: s.fee - paidThisMonthAmt 
+          });
+          dueTotal += (s.fee - paidThisMonthAmt);
+      }
+  });
+
+  const paidCount = students.length - unpaidItems.length;
   const paidRate = students.length ? Math.round((paidCount / students.length) * 100) : 0;
   const overview = document.getElementById('unpaid-overview');
   if (overview) {
     overview.innerHTML = `
-      <div class="metric"><div class="metric-label">عدد المتأخرين</div><div class="metric-value">${unpaid.length}</div><div class="metric-note">طالب</div></div>
+      <div class="metric"><div class="metric-label">عدد المتأخرين</div><div class="metric-value">${unpaidItems.length}</div><div class="metric-note">طالب</div></div>
       <div class="metric"><div class="metric-label">إجمالي المستحق</div><div class="metric-value">${dueTotal.toLocaleString()}</div><div class="metric-note">جنيه</div></div>
       <div class="metric"><div class="metric-label">الطلاب المسددون</div><div class="metric-value">${paidCount}</div><div class="metric-note">${paidRate}% من الإجمالي</div></div>
       <div class="metric"><div class="metric-label">الشهر الحالي</div><div class="metric-value">${MONTHS_AR[m-1]}</div><div class="metric-note">${y}</div></div>
@@ -1333,25 +1355,26 @@ function renderUnpaidPage() {
   const empty = document.getElementById('unpaid-empty');
   if (!tbody || !empty) return;
 
-  if (!unpaid.length) {
+  if (!unpaidItems.length) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
 
-  tbody.innerHTML = unpaid.map(s => `
+  tbody.innerHTML = unpaidItems.map(({student: s, paidMonthNames, owed}) => {
+    return `
     <tr>
       <td class="fw-bold">${s.name}</td>
       <td><span class="badge ${{'الأولى':'badge-year1','الثانية':'badge-year2','الثالثة':'badge-year3'}[s.year] || ''}">${s.year}</span></td>
       <td><span class="type-badge">${s.type}</span></td>
-      <td class="text-green fw-bold">${s.fee.toLocaleString()} جنيه</td>
+      <td class="text-green fw-bold">${owed.toLocaleString()} جنيه <div style="font-size:11px;color:var(--text-dim);margin-top:4px">(الشهور المسددة: ${paidMonthNames})</div></td>
       <td style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-sm btn-pay" onclick="openPayForStudent('${s.id}')"><span data-icon="credit-card"></span> دفع</button>
         <button class="btn-sm btn-details" onclick="showStudentDetail('${s.id}')"><span data-icon="list"></span> تفاصيل</button>
       </td>
     </tr>
-  `).join('');
+  `}).join('');
 }
 
 
@@ -1436,7 +1459,7 @@ function renderStudentsTable() {
 
 function getStudentStatus(s, payments, now) {
   const m = now.getMonth() + 1, y = now.getFullYear();
-  const paidThis = payments.filter(p => p.studentId === s.id && p.monthCovered == m && p.yearCovered == y);
+  const paidThis = payments.filter(p => p.studentId === s.id && String(p.monthCovered) == String(m) && String(p.yearCovered) == String(y));
   const total = paidThis.reduce((sum, p) => sum + p.amount, 0);
   if (total >= s.fee) return 'paid';
   if (total > 0) return 'partial';
@@ -1599,11 +1622,11 @@ function renderMonthSummary() {
   document.getElementById('month-summary').innerHTML = `
     <div class="month-card">
       <div class="month-card-value text-green">${thisTotal.toLocaleString()}</div>
-      <div class="month-card-label">إيرادات ${MONTHS_AR[m-1]} (جنيه)</div>
+      <div class="month-card-label">إيرادات الشهر ده (${MONTHS_AR[m-1]}) (جنيه)</div>
     </div>
     <div class="month-card">
       <div class="month-card-value text-gold">${lastTotal.toLocaleString()}</div>
-      <div class="month-card-label">إيرادات ${MONTHS_AR[m===1?11:m-2]} (جنيه)</div>
+      <div class="month-card-label">إيرادات الشهر اللي قبله (${MONTHS_AR[m===1?11:m-2]}) (جنيه)</div>
     </div>
     <div class="month-card">
       <div class="month-card-value text-gold">${thisMonth.length}</div>
@@ -1662,8 +1685,8 @@ function renderCalendar() {
     const isToday = d === today && calMonth === todayMonth && calYear === todayYear;
     const hasPay = payDays[d];
     html += `<div class="cal-day ${isToday?'today':''} ${hasPay?'has-payments':''}" onclick="showDayPayments(${d})">
-      <span>${d}</span>
-      ${hasPay ? `<span style="font-size:9px;color:var(--green)">${hasPay >= 1000 ? (hasPay/1000).toFixed(1)+'k' : hasPay}</span>` : ''}
+      <span style="transform:translateY(${hasPay ? '-4px' : '0'})">${d}</span>
+      ${hasPay ? `<span class="cal-pay-amount">${hasPay >= 1000 ? (hasPay/1000).toFixed(1)+'k' : hasPay}</span>` : ''}
     </div>`;
   }
 
@@ -1805,7 +1828,9 @@ function openAddPayment(paymentId = null) {
       document.getElementById('pay-student-dropdown').style.display = 'none';
       document.getElementById('pay-amount').value = p.amount;
       document.getElementById('pay-date').value = p.date;
-      document.getElementById('pay-month-covered').value = p.monthCovered;
+      Array.from(document.getElementById('pay-month-covered').options).forEach(o => o.selected = false);
+      const opt = document.getElementById('pay-month-covered').querySelector(`option[value="${p.monthCovered}"]`);
+      if (opt) opt.selected = true;
       document.getElementById('pay-note').value = p.note || '';
       const sel = document.getElementById('pay-student-selected');
       sel.style.display = 'block';
@@ -1833,7 +1858,10 @@ function openAddPayment(paymentId = null) {
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   const dd = String(now.getDate()).padStart(2, '0');
   document.getElementById('pay-date').value = `${yyyy}-${mm}-${dd}`;
-  document.getElementById('pay-month-covered').value = now.getMonth() + 1;
+  Array.from(document.getElementById('pay-month-covered').options).forEach(o => o.selected = false);
+  const currMonth = now.getMonth() + 1;
+  const opt = document.getElementById('pay-month-covered').querySelector(`option[value="${currMonth}"]`);
+  if (opt) opt.selected = true;
 
   const yearSel = document.getElementById('pay-year-covered');
   yearSel.innerHTML = '';
@@ -1892,24 +1920,32 @@ function savePayment() {
   const studentId = document.getElementById('pay-student-id').value;
   const amount = parseInt(document.getElementById('pay-amount').value);
   const date = document.getElementById('pay-date').value;
-  const monthCovered = parseInt(document.getElementById('pay-month-covered').value);
+  
+  const monthCoveredSel = document.getElementById('pay-month-covered');
+  const selectedMonths = Array.from(monthCoveredSel.selectedOptions).map(o => parseInt(o.value));
   const yearCovered = parseInt(document.getElementById('pay-year-covered').value);
   const note = document.getElementById('pay-note').value.trim();
 
   if (!studentId) { toast('<span data-icon="x-circle"></span> اختر الطالب'); return; }
   if (!amount || amount <= 0) { toast('<span data-icon="x-circle"></span> اكتب المبلغ'); return; }
   if (!date) { toast('<span data-icon="x-circle"></span> اختر تاريخ الدفع'); return; }
+  if (selectedMonths.length === 0) { toast('<span data-icon="x-circle"></span> اختر الشهر'); return; }
 
   const payments = DB.payments;
+  
   if (editingPaymentId) {
     const idx = payments.findIndex(p => p.id === editingPaymentId);
     if (idx !== -1) {
-      payments[idx] = { ...payments[idx], studentId, amount, date, monthCovered, yearCovered, note };
+      payments[idx] = { ...payments[idx], studentId, amount, date, monthCovered: selectedMonths[0], yearCovered, note };
     }
     editingPaymentId = null;
     toast(`<span data-icon="check-circle"></span> تم تعديل الدفعة`);
   } else {
-    payments.push({ id: uid(), studentId, amount, date, monthCovered, yearCovered, note, createdAt: new Date().toISOString() });
+    const amtPerMonth = Math.round(amount / selectedMonths.length);
+    selectedMonths.forEach((m, i) => {
+        const amt = (i === selectedMonths.length - 1) ? (amount - amtPerMonth * i) : amtPerMonth;
+        payments.push({ id: uid(), studentId, amount: amt, date, monthCovered: m, yearCovered, note, createdAt: new Date().toISOString() });
+    });
     const s = DB.students.find(x => x.id === studentId);
     toast(`<span data-icon="check-circle"></span> تم تسجيل دفعة ${s ? s.name : ''}`);
   }
