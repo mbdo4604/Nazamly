@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1b2d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="نظملي">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<title>نظملي</title>
+<style>
+  :root {
+    --bg-deep: #060d1a;
+    --bg-main: #0b1628;
+    --bg-card: rgba(17, 30, 53, 0.65);
+    --bg-card2: rgba(22, 38, 64, 0.8);
+    --bg-modal: rgba(17, 30, 53, 0.85);
+    --accent: #c9a24e;
+    --accent-2: #7dd3fc;
+    --gold: #c9a24e;
+    --gold-dim: #8a6420;
+    --teal: #1a9e8f;
+    --teal-light: #22c5b3;
+    --red: #ef4444;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --text: #f8fafc;
+    --text-dim: #94a3b8;
+    --border: rgba(255, 255, 255, 0.1);
+    --shadow-sm: 0 8px 30px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.6);
+    --card-radius: 28px;
+    --btn-radius: 18px;
+    --dock-radius: 99px;
+  }
+
+  html.light-mode {
+    --bg-deep: #f0f4f8;
+    --bg-main: #e2e8f0;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --bg-card2: rgba(248, 250, 252, 0.95);
+    --bg-modal: rgba(255, 255, 255, 0.95);
+    --accent: #b8720a;
+    --gold: #b8720a;
+    --gold-dim: #e09a1e;
+    --teal: #0a8f80;
+    --teal-light: #0cb8a6;
+    --red: #d42b2b;
+    --green: #17a854;
+    --text: #0f172a;
+    --text-dim: #64748b;
+    --border: rgba(0, 0, 0, 0.08);
+    --shadow-sm: 0 8px 30px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: 
+      radial-gradient(circle at 10% 0%, rgba(201, 162, 78, 0.1), transparent 50%),
+      radial-gradient(circle at 90% 100%, rgba(125, 211, 252, 0.08), transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  #app { position: relative; z-index: 1; min-height: 100vh; padding-bottom: 120px; }
+
+  /* ===== PREMIUM DOCK (iOS Style) ===== */
+  nav {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: min(500px, calc(100% - 32px)); height: 72px;
+    background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--dock-radius);
+    padding: 8px 12px; display: flex; align-items: center; justify-content: space-around;
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); z-index: 100;
+  }
+  html.light-mode nav { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.1); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+  .nav-brand { display: none; }
+  .nav-tabs { display: flex; width: 100%; justify-content: space-around; align-items: center; gap: 4px; }
+  .nav-tab {
+    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; background: transparent; border: none; color: var(--text-dim); cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; height: 56px; border-radius: 20px;
+  }
+  .nav-tab .tab-icon { font-size: 24px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+  .nav-tab .tab-label { font-size: 11px; font-weight: 700; opacity: 0.8; }
+  .nav-tab.active { color: var(--gold); }
+  .nav-tab.active .tab-icon {
+    transform: translateY(-3px);
+    width: 44px; height: 44px;
+    border: 1.5px solid rgba(201,150,58,0.5);
+    background: rgba(201,150,58,0.1);
+    border-radius: 50%;
+  }
+
+  /* ===== HEADER & HERO ===== */
+  .top-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 24px 12px; }
+  .page { padding: 0 20px 40px; display:none; animation: fadeUp 0.4s ease; }
+  .page.active { display:block; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+  .home-hero { text-align: center; padding: 32px 8px; }
+  .greeting-arabic { font-family: 'Aref Ruqaa Ink', serif; font-size: clamp(36px, 8vw, 54px); color: var(--text); line-height: 1.3; margin-bottom: 8px; }
+  .greeting-sub { color: var(--gold); font-size: 15px; font-weight: 700; }
+
+  /* ===== PREMIUM STATS TILES ===== */
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 32px; }
+  .stat-tile {
+    background: linear-gradient(145deg, var(--bg-card), rgba(255,255,255,0.02));
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border); border-radius: var(--card-radius); padding: 20px;
+    display: flex; flex-direction: column; justify-content: space-between; min-height: 125px;
+    cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+  }
+  .stat-tile:active { transform: scale(0.95); opacity: 0.9; }
+  .stat-tile-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+  .stat-tile-icon { font-size: 26px; line-height:1; }
+  .stat-tile.gold .stat-tile-icon { color: var(--gold); }
+  .stat-tile.gold .stat-tile-value { color: var(--gold); }
+  .stat-tile.green .stat-tile-value { color: var(--green); }
+  .stat-tile.red .stat-tile-value { color: var(--red); }
+  .stat-tile.blue .stat-tile-value { color: var(--accent-2); }
+  .stat-tile-arrow { color: var(--text-dim); transition: 0.3s; opacity:0.6; }
+  .stat-tile:hover .stat-tile-arrow { transform: translateX(-4px); color: var(--text); opacity:1; }
+  .stat-tile-value { font-size: 24px; font-weight: 900; line-height: 1.2; }
+  .stat-tile-label { font-size: 13px; color: var(--text-dim); font-weight: 700; margin-top: 4px; }
+
+  /* ===== QUICK ACTIONS & BUTTONS ===== */
+  .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 32px; }
+  .btn-primary, .btn-secondary, .btn-danger, .btn-pay, .btn-details, .btn-sm, .btn-install {
+    border-radius: var(--btn-radius); font-weight: 700; cursor: pointer; transition: 0.25s; border:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--gold) 0%, #a67820 100%); color:#000; padding: 16px 24px; font-size: 15px; box-shadow: 0 8px 25px -5px rgba(201, 150, 58, 0.4); }
+  .btn-primary:active { transform: scale(0.96); box-shadow: 0 4px 15px -5px rgba(201, 150, 58, 0.4); }
+  .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); padding: 16px 24px; font-size: 15px; }
+  .btn-secondary:active { transform: scale(0.96); }
+  .btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 12px; }
+  .btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .btn-pay { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .btn-details { background: rgba(201,150,58,0.15); color: var(--gold); border: 1px solid rgba(201,150,58,0.3); }
+  .pill-button { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; color: var(--text); font-family:'Cairo'; transition:0.2s; cursor:pointer; }
+  .pill-button:active { transform:scale(0.98); background: rgba(255,255,255,0.05); }
+
+  /* ===== SECTIONS & TABLES ===== */
+  .section { margin-bottom: 32px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .section-title span[data-icon] { color: var(--gold); font-size: 22px; }
+  .table-wrap {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius);
+    overflow-x: auto; box-shadow: var(--shadow-sm); -webkit-overflow-scrolling: touch;
+    backdrop-filter: blur(16px);
+  }
+  .table-filters { display:flex; gap:10px; padding:16px; flex-wrap:wrap; border-bottom:1px solid var(--border); }
+  .filter-input, .filter-select {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text); border-radius: 12px; padding: 10px 14px; font-family:'Cairo'; font-size:14px; outline:none; transition:0.2s;
+  }
+  .filter-input { flex:1; min-width: 140px; }
+  .filter-input:focus, .filter-select:focus { border-color: var(--gold); background:rgba(255,255,255,0.08); }
+  
+  table { width: 100%; border-collapse: collapse; min-width: 650px; }
+  thead th { background: rgba(0,0,0,0.15); padding: 16px 20px; font-size: 13px; text-align: right; color: var(--gold); border-bottom: 1px solid var(--border); white-space:nowrap; }
+  tbody td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 15px; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: 0.2s; }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+  /* ===== ALERTS & BADGES ===== */
+  .badge { display:inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight:700; white-space:nowrap; }
+  .badge-paid { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-partial { background: rgba(201,150,58,0.15); color: var(--gold); }
+  .badge-unpaid { background: rgba(239,68,68,0.15); color: var(--red); }
+  .type-badge { background: rgba(255,255,255,0.08); color: var(--text-dim); padding: 4px 10px; border-radius: 8px; font-size:12px; }
+  .payment-month-badge { background: rgba(34,197,94,0.1); color: var(--green); padding: 4px 10px; border-radius: 8px; font-size:12px; font-weight:700; }
+  
+  .alert-button { width:100%; display:block; text-align:right; border:none; background:transparent; padding:0; cursor:pointer; }
+  .alert-item {
+    background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--btn-radius); padding: 16px;
+    display: flex; align-items: center; gap: 16px; margin-bottom: 12px; transition: 0.2s;
+  }
+  .alert-button:active .alert-item { transform:scale(0.98); background: rgba(239,68,68,0.1); }
+  .alert-icon { font-size: 24px; color: var(--red); }
+  .alert-text h4 { font-size: 15px; font-weight: 700; color:var(--text); margin-bottom:4px; }
+  .alert-text p { font-size: 13px; color: var(--text-dim); }
+
+  /* ===== CHARTS & RINGS ===== */
+  .chart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+  .chart-head { display: flex; justify-content: space-between; margin-bottom: 24px; }
+  .chart-title { font-size: 16px; font-weight: 800; }
+  .chart-sub { font-size: 13px; color: var(--text-dim); }
+  .metric-value { font-size: 28px; font-weight: 900; color: var(--gold); }
+  
+  .ring-row { display: flex; justify-content: space-around; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
+  .ring-card { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .ring {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: conic-gradient(var(--gold) var(--p), rgba(255,255,255,0.05) 0);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+  }
+  .ring.green { background: conic-gradient(var(--green) var(--p), rgba(255,255,255,0.05) 0); }
+  .ring::before {
+    content: ''; position: absolute; inset: 10%; border-radius: 50%;
+    background: var(--bg-card);
+  }
+  .ring-value { position: relative; font-size: 20px; font-weight: 900; color: var(--text); z-index: 1; }
+  .ring-label { font-size: 13px; font-weight: 700; color: var(--text-dim); }
+  .line-chart { width: 100%; height: auto; overflow: visible; }
+  .line-path { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 4px 6px rgba(201,150,58,0.3)); }
+  .line-area { fill: url(#lineFill); }
+
+  /* ===== CALENDAR & HISTORY ===== */
+  .calendar-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius); overflow:hidden; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .cal-nav-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text); display: flex; align-items: center; justify-content: center; cursor:pointer; font-size:18px; }
+  .cal-title { font-size: 18px; font-weight: 700; color: var(--gold); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 16px; }
+  .cal-day-name { text-align: center; font-size: 12px; color: var(--text-dim); font-weight: 700; padding: 8px 0; }
+  .cal-day {
+    aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 14px; cursor: pointer; font-size: 15px; font-weight:600; transition: 0.2s; position: relative; gap:2px;
+  }
+  .cal-day:hover { background: rgba(255,255,255,0.05); }
+  .cal-day.today { background: rgba(201,150,58,0.2); color: var(--gold); border:1px solid rgba(201,150,58,0.4); }
+  .cal-day.has-payments::after { content: ''; position: absolute; bottom: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .cal-day.empty { cursor: default; }
+  .cal-day.other-month { opacity: 0.3; }
+  .calendar-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
+
+  .payment-timeline { display: flex; flex-direction: column; gap: 12px; }
+  .payment-item { display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; padding: 16px; position: relative; }
+  .payment-item::before { content: ''; position: absolute; right: -1px; top: 50%; transform: translateY(-50%); width: 4px; height: 60%; border-radius: 4px; background: var(--green); }
+  .payment-amount { font-size: 18px; font-weight: 900; color: var(--green); }
+
+  /* ===== FORMS, MODALS & CHIPS ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; visibility: hidden; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-overlay.open { opacity: 1; visibility: visible; }
+  .modal {
+    background: var(--bg-modal); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 32px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    transform: translateY(40px) scale(0.95); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: var(--shadow-xl);
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+  .modal-header { padding: 24px 24px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-title { font-size: 20px; font-weight: 800; display:flex; align-items:center; gap:8px; color:var(--text); }
+  .modal-close { width: 36px; height: 36px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--text-dim); border:none; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:0.2s; }
+  .modal-close:hover { background: rgba(239,68,68,0.2); color:var(--red); }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px 24px; display: flex; justify-content: flex-end; gap: 12px; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; }
+  .form-control {
+    width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 14px; padding: 14px 16px;
+    font-family: 'Cairo'; font-size: 15px; outline: none; transition: 0.2s;
+  }
+  .form-control:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,150,58,0.2); }
+  
+  .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    padding: 10px 18px; border-radius: 30px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03); color: var(--text-dim); font-family: 'Cairo';
+    font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s;
+  }
+  .chip.selected { background: rgba(201,150,58,0.2); border-color: var(--gold); color: var(--gold); }
+
+  /* ===== SETTINGS & MISC ===== */
+  .settings-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius); overflow: hidden; margin-bottom: 20px; }
+  .settings-section-title { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 10px; }
+  .settings-item { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  .settings-item:last-child { border-bottom: none; }
+  .settings-item-info h4 { font-size: 15px; font-weight: 700; margin-bottom:4px; }
+  .settings-item-info p { font-size: 13px; color: var(--text-dim); }
+  
+  .btn-install { background: linear-gradient(135deg, var(--teal) 0%, #115e56 100%); color: #fff; padding: 12px 20px; }
+  .btn-install:disabled { opacity: 0.5; filter:grayscale(1); cursor:not-allowed; }
+  
+  .theme-toggle-wrap { display: flex; align-items: center; gap: 12px; }
+  .theme-label { font-size: 14px; font-weight: 600; color: var(--text-dim); }
+  .toggle-switch { position: relative; width: 54px; height: 30px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--bg-card2); border: 1.5px solid var(--border); border-radius: 30px; cursor: pointer; transition: 0.3s; padding: 3px; display: flex; align-items: center; }
+  .toggle-slider::before { content: ''; width: 22px; height: 22px; background: var(--text); border-radius: 50%; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .toggle-switch input:checked + .toggle-slider { background: rgba(201, 150, 58, 0.2); border-color: var(--gold); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(24px); background: var(--gold); }
+
+  .empty-state { text-align: center; padding: 60px 20px; }
+  .empty-icon { font-size: 64px; color:var(--border); margin-bottom: 16px; }
+  .empty-text { font-size: 16px; color: var(--text-dim); }
+  
+  .month-cards, .revenue-overview { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+  .month-card, .metric { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+  .month-card-value, .metric-value { font-size: 24px; font-weight: 900; color:var(--text); }
+  .month-card-label, .metric-label { font-size: 13px; color: var(--text-dim); margin-top: 4px; font-weight:600;}
+  .metric-note { font-size: 12px; color: var(--gold); margin-top: 6px; }
+  .revenue-filters { display:flex; gap:12px; margin-bottom: 24px; }
+  
+  .chart-card, .summary-panel { border: 1px solid var(--border); border-radius:var(--card-radius); background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); padding: 20px; }
+  .chart-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom: 20px; }
+  .chart-title { font-size: 16px; font-weight: 800; }
+  .chart-sub { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+  
+  #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--gold); color: #000; padding: 14px 32px; border-radius: 999px; font-weight: 800; font-size: 15px; z-index: 3000; box-shadow: 0 15px 35px rgba(201, 150, 58, 0.4); transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  .text-gold { color: var(--gold); } .text-green { color: var(--green); } .text-red { color: var(--red); } .text-dim { color: var(--text-dim); } .fw-bold { font-weight: 800; }
+  .icon, [data-icon] { display:inline-flex; width:1.15em; height:1.15em; vertical-align:-0.2em; align-items:center; justify-content:center; }
+  .icon svg, [data-icon] svg { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+  @media (max-width: 600px) {
+    .month-cards, .revenue-overview, .calendar-actions, .form-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .page { padding: 0 16px 30px; }
+    nav { bottom: 16px; width: calc(100% - 24px); border-radius: 30px; }
+    .stat-tile { min-height:100px; padding:16px; }
+    .stat-tile-value { font-size:20px; }
+    .greeting-arabic { font-size: 38px; }
+    tbody td, thead th { padding: 14px 16px; font-size: 14px; }
+    .revenue-filters { flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <div class="splash-logo"></div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- App -->
+<div id="app">
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">نظملي</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="goPage('home')" id="tab-home">
+        <span class="tab-icon"><span data-icon="home"></span></span><span class="tab-label">الرئيسية</span>
+      </button>
+      <button class="nav-tab" onclick="goPage('students')" id="tab-students">
+        <span class="tab-icon"><span data-icon="users"></span></span><span class="tab-label">الطلاب</span>
+      </button>
+      <button class="nav-tab" onclick="goPage('payments')" id="tab-payments">
+        <span class="tab-icon"><span data-icon="coins"></span></span><span class="tab-label">الدفعات</span>
+      </button>
+      <button class="nav-tab" onclick="goPage('calendar')" id="tab-calendar">
+        <span class="tab-icon"><span data-icon="calendar"></span></span><span class="tab-label">التقويم</span>
+      </button>
+      <button class="nav-tab" onclick="goPage('settings')" id="tab-settings">
+        <span class="tab-icon"><span data-icon="settings"></span></span><span class="tab-label">الإعدادات</span>
+      </button>
+    </div>
+  </nav>
+
+
+  <!-- HOME PAGE -->
+  <div class="page active" id="page-home">
+    <div class="home-hero">
+      <div class="greeting-arabic">ازيك يا أستاذ عبدالمقصود</div>
+      <div class="greeting-sub" id="home-date"></div>
+    </div>
+
+    <div class="stats-grid" id="stats-grid">
+      <!-- filled by JS -->
+    </div>
+
+    <div id="home-charts" class="home-charts"></div>
+
+    <div class="quick-actions">
+      <button class="btn-primary" onclick="openAddStudent()">
+        <span data-icon="plus"></span> إضافة طالب
+      </button>
+      <button class="btn-primary" onclick="openAddPayment()">
+        <span data-icon="credit-card"></span> تسجيل دفعة
+      </button>
+      <button class="btn-secondary" onclick="goPage('students')">
+        <span data-icon="list"></span> كل الطلاب
+      </button>
+      <button class="btn-secondary" onclick="goPage('revenue')">
+        <span data-icon="chart"></span> الإيرادات
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span data-icon="bell"></span> تنبيهات <span id="alerts-count"></span></div>
+      </div>
+      <div id="alerts-list"></div>
+    </div>
+
+    <!-- Recent Payments -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span data-icon="receipt"></span> آخر الدفعات</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>الطالب</th><th>المبلغ</th><th>التاريخ</th><th>الشهر</th>
+          </tr></thead>
+          <tbody id="recent-payments-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENTS PAGE -->
+  <div class="page" id="page-students">
+    <div style="padding:24px 24px 0">
+      <div class="section-header">
+        <div class="section-title"><span data-icon="users"></span> الطلاب المسجلين</div>
+        <button class="btn-primary" onclick="openAddStudent()"><span data-icon="plus"></span> طالب جديد</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="table-wrap">
+        <div class="table-filters">
+          <input class="filter-input" id="search-students" placeholder="ابحث باسم الطالب..." oninput="renderStudentsTable()">
+          <select class="filter-select" id="filter-year" onchange="renderStudentsTable()">
+            <option value="">كل السنوات</option>
+            <option>الأولى</option><option>الثانية</option><option>الثالثة</option>
+          </select>
+          <select class="filter-select" id="filter-type" onchange="renderStudentsTable()">
+            <option value="">كل الأنواع</option>
+            <option>نظامي</option><option>عمال</option><option>جدارات</option><option>خدمات</option>
+          </select>
+          <select class="filter-select" id="filter-status" onchange="renderStudentsTable()">
+            <option value="">كل الحالات</option>
+            <option value="paid">مدفوع</option>
+            <option value="partial">جزئي</option>
+            <option value="unpaid">غير مدفوع</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr>
+            <th>#</th><th>اسم الطالب</th><th>السنة</th><th>النوع</th>
+            <th>إجمالي مدفوع</th><th>الرصيد</th><th>الحالة</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody id="students-table-body"></tbody>
+        </table>
+        <div id="students-empty" class="empty-state" style="display:none">
+          <div class="empty-icon"><span data-icon="graduation-cap"></span></div>
+          <div class="empty-text">لا يوجد طلاب مسجلين حتى الآن</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS PAGE -->
+  <div class="page" id="page-payments">
+    <div style="padding:24px 24px 0">
+      <div class="section-header">
+        <div class="section-title"><span data-icon="coins"></span> سجل الدفعات</div>
+        <button class="btn-primary" onclick="openAddPayment()"><span data-icon="credit-card"></span> تسجيل دفعة</button>
+      </div>
+    </div>
+    <div class="section">
+      <!-- Monthly summary -->
+      <div class="month-cards" id="month-summary"></div>
+
+      <div class="table-wrap">
+        <div class="table-filters">
+          <input class="filter-input" id="search-payments" placeholder="ابحث..." oninput="renderPaymentsTable()">
+          <select class="filter-select" id="filter-pay-month" onchange="renderPaymentsTable()">
+            <option value="">كل الشهور</option>
+          </select>
+          <select class="filter-select" id="filter-pay-year-f" onchange="renderPaymentsTable()">
+            <option value="">كل السنوات الدراسية</option>
+            <option>الأولى</option><option>الثانية</option><option>الثالثة</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr>
+            <th>الطالب</th><th>السنة</th><th>النوع</th>
+            <th>المبلغ</th><th>الشهر المدفوع</th><th>تاريخ الدفع</th><th>ملاحظة</th><th>حذف</th>
+          </tr></thead>
+          <tbody id="payments-table-body"></tbody>
+        </table>
+        <div id="payments-empty" class="empty-state" style="display:none">
+          <div class="empty-icon"><span data-icon="receipt"></span></div>
+          <div class="empty-text">لا توجد دفعات مسجلة</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- CALENDAR PAGE -->
+  <div class="page" id="page-calendar">
+    <div style="padding:24px 24px 0">
+      <div class="section-title"><span data-icon="calendar"></span> تقويم الدفعات</div>
+    </div>
+    <div class="section" style="margin-top:16px">
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <button class="cal-nav-btn" onclick="calPrev()"><span data-icon="chevron-left"></span></button>
+          <div class="cal-title" id="cal-title"></div>
+          <button class="cal-nav-btn" onclick="calNext()"><span data-icon="chevron-right"></span></button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <div class="calendar-actions">
+        <button class="pill-button" onclick="goPage('revenue')">
+          <span><strong>إيرادات الشهر</strong><br><span class="text-dim">اختيار السنة والنوع والتفاصيل</span></span>
+          <span data-icon="chart"></span>
+        </button>
+        <button class="pill-button" onclick="goPage('unpaid')">
+          <span><strong>الطلاب المتأخرين</strong><br><span class="text-dim">كل اللي لم يدفعوا هذا الشهر</span></span>
+          <span data-icon="alert"></span>
+        </button>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="section-title" id="cal-day-title" style="margin-bottom:16px">اضغط على يوم لعرض دفعاته</div>
+        <div id="cal-day-payments"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE PAGE -->
+  <div class="page" id="page-revenue">
+    <div style="padding:24px 24px 0">
+      <div class="section-header">
+        <div class="section-title"><span data-icon="chart"></span> الإيرادات</div>
+        <button class="btn-primary" onclick="openRevenueDetails()">
+          <span data-icon="list"></span> تفاصيل
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="revenue-filters">
+        <select class="filter-select" id="revenue-month" onchange="renderRevenuePage()">
+          <option value="">كل الشهور</option>
+        </select>
+        <select class="filter-select" id="revenue-year" onchange="renderRevenuePage()">
+          <option value="">كل السنوات</option>
+          <option>الأولى</option><option>الثانية</option><option>الثالثة</option>
+        </select>
+        <select class="filter-select" id="revenue-type" onchange="renderRevenuePage()">
+          <option value="">كل الأنواع</option>
+          <option>نظامي</option><option>عمال</option><option>جدارات</option><option>خدمات</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="revenue-overview" id="revenue-overview"></div>
+    </div>
+
+    <div class="section">
+      <div class="summary-panel">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">ملخص الإيرادات</div>
+            <div class="chart-sub">يعرض حسب الشهر والسنة والنوع المختار</div>
+          </div>
+          <button class="btn-secondary" onclick="openRevenueDetails()">
+            <span data-icon="chevron-left"></span> كل المدفوعات
+          </button>
+        </div>
+        <div id="revenue-breakdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNPAID PAGE -->
+  <div class="page" id="page-unpaid">
+    <div style="padding:24px 24px 0">
+      <div class="section-header">
+        <div class="section-title"><span data-icon="alert"></span> الطلاب اللي لم يدفعوا هذا الشهر</div>
+        <button class="btn-primary" onclick="goPage('home')">
+          <span data-icon="home"></span> الرئيسية
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="revenue-overview" id="unpaid-overview"></div>
+    </div>
+
+    <div class="section">
+      <div class="table-wrap">
+        <table class="unpaid-table">
+          <thead><tr>
+            <th>الطالب</th><th>السنة</th><th>النوع</th><th>الرسوم</th><th>إجراءات</th>
+          </tr></thead>
+          <tbody id="unpaid-table-body"></tbody>
+        </table>
+        <div id="unpaid-empty" class="empty-state" style="display:none">
+          <div class="empty-icon"><span data-icon="check-circle"></span></div>
+          <div class="empty-text">كل الطلاب دفعوا هذا الشهر</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+
+  <div class="page" id="page-settings">
+    <div style="padding:24px 24px 0 24px">
+      <div class="section-title"><span data-icon="settings"></span> الإعدادات</div>
+    </div>
+    <div class="section" style="margin-top:20px">
+
+      <div class="settings-section">
+        <div class="settings-section-title"><span data-icon="smartphone"></span> تثبيت التطبيق</div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>تثبيت على الشاشة الرئيسية</h4>
+            <p>أضف التطبيق على شاشتك عشان توصله بسرعة زي أي تطبيق عادي وليه أيقونة</p>
+          </div>
+          <button class="btn-install" id="install-btn" disabled onclick="installApp()">
+            <span data-icon="download"></span> تثبيت
+          </button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>وضع الإضاءة</h4>
+            <p>اختار بين الوضع الداكن والوضع الفاتح</p>
+          </div>
+          <div class="theme-toggle-wrap">
+            <span class="theme-label" id="theme-label">داكن <span data-icon="moon"></span></span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title"><span data-icon="chart"></span> البيانات والنسخ الاحتياطي</div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>تصدير البيانات</h4>
+            <p>حمّل نسخة من كل البيانات (JSON)</p>
+          </div>
+          <button class="btn-secondary btn-sm" onclick="exportData()"><span data-icon="upload"></span> تصدير</button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>استيراد البيانات</h4>
+            <p>ارفع نسخة احتياطية سابقة</p>
+          </div>
+          <button class="btn-secondary btn-sm" onclick="document.getElementById('import-file').click()">
+            <span data-icon="download"></span> استيراد
+          </button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>مسح كل البيانات</h4>
+            <p style="color:var(--red)"><span data-icon="alert"></span> لا يمكن التراجع عن هذا الإجراء</p>
+          </div>
+          <button class="btn-sm btn-danger" onclick="clearAllData()"><span data-icon="trash"></span> مسح</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title"><span data-icon="info"></span>️ معلومات النظام</div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>الإصدار</h4>
+            <p>نظام متابعة الطلاب - v1.0</p>
+          </div>
+          <span class="badge badge-paid"><span data-icon="check-circle"></span> محدّث</span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>التخصص</h4>
+            <p>تبريد وتكييف - ثانوي صناعي</p>
+          </div>
+          <span><span data-icon="sparkles"></span></span>
+        </div>
+      </div>
+
+      <div style="text-align:center; padding: 24px 16px 8px; color: var(--text-dim); font-size: 14px; font-weight: 600; line-height: 1.8; opacity: 0.85;">
+        اي خدمه يعم عبده ادعي لابنك بقى ❤️
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="modal-add-student">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><span data-icon="plus"></span> إضافة طالب جديد</div>
+      <button class="modal-close" onclick="closeModal('modal-add-student')"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">اسم الطالب</label>
+        <input class="form-control" id="student-name" placeholder="اكتب اسم الطالب كاملاً" list="existing-students-list">
+        <datalist id="existing-students-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label">السنة الدراسية</label>
+        <div class="chip-group" id="year-chips">
+          <button class="chip" onclick="selectChip('year-chips',this,'الأولى')">الأولى</button>
+          <button class="chip" onclick="selectChip('year-chips',this,'الثانية')">الثانية</button>
+          <button class="chip" onclick="selectChip('year-chips',this,'الثالثة')">الثالثة</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">نوع الطالب</label>
+        <div class="chip-group" id="type-chips">
+          <button class="chip" onclick="selectChip('type-chips',this,'نظامي')">نظامي</button>
+          <button class="chip" onclick="selectChip('type-chips',this,'عمال')">عمال</button>
+          <button class="chip" onclick="selectChip('type-chips',this,'جدارات')">جدارات</button>
+          <button class="chip" onclick="selectChip('type-chips',this,'خدمات')">خدمات</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">الرسوم الشهرية (جنيه)</label>
+          <input class="form-control" id="student-fee" type="number" placeholder="مثال: 200">
+        </div>
+        <div class="form-group">
+          <label class="form-label">رقم الهاتف (اختياري)</label>
+          <input class="form-control" id="student-phone" type="tel" placeholder="01xxxxxxxxx">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ملاحظات</label>
+        <input class="form-control" id="student-notes" placeholder="أي ملاحظات إضافية...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-add-student')">إلغاء</button>
+      <button class="btn-primary" onclick="saveStudent()"><span data-icon="database"></span> حفظ الطالب</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Payment Modal -->
+<div class="modal-overlay" id="modal-add-payment">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><span data-icon="credit-card"></span> تسجيل دفعة</div>
+      <button class="modal-close" onclick="closeModal('modal-add-payment')"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">اختر الطالب</label>
+        <input class="form-control" id="pay-student-search" placeholder="ابحث باسم الطالب..." oninput="filterPayStudents()" autocomplete="off">
+        <div id="pay-student-dropdown" style="display:none;background:var(--bg-main);border:1px solid var(--border);border-radius:12px;margin-top:6px;max-height:200px;overflow-y:auto;"></div>
+        <input type="hidden" id="pay-student-id">
+        <div id="pay-student-selected" style="display:none;margin-top:10px;padding:12px;background:rgba(201,150,58,0.1);border-radius:12px;border:1px solid rgba(201,150,58,0.3)"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">المبلغ المدفوع (جنيه)</label>
+          <input class="form-control" id="pay-amount" type="number" placeholder="مثال: 200">
+        </div>
+        <div class="form-group">
+          <label class="form-label">تاريخ الدفع</label>
+          <input class="form-control" id="pay-date" type="date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الشهر الذي يغطيه هذا الدفع</label>
+        <div style="display:flex;gap:8px;">
+          <select class="form-control" id="pay-month-covered" style="flex:1">
+            <option value="1">يناير</option><option value="2">فبراير</option>
+            <option value="3">مارس</option><option value="4">أبريل</option>
+            <option value="5">مايو</option><option value="6">يونيو</option>
+            <option value="7">يوليو</option><option value="8">أغسطس</option>
+            <option value="9">سبتمبر</option><option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+          </select>
+          <select class="form-control" id="pay-year-covered" style="width:90px">
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ملاحظة</label>
+        <input class="form-control" id="pay-note" placeholder="مثال: دفع شهرين مع بعض، أو دفع نصف...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-add-payment')">إلغاء</button>
+      <button class="btn-primary" onclick="savePayment()"><span data-icon="check-circle"></span> تسجيل الدفعة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student Details Modal -->
+<div class="modal-overlay" id="modal-student-detail">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="detail-title">تفاصيل الطالب</div>
+      <button class="modal-close" onclick="closeModal('modal-student-detail')"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body" id="detail-body">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-student-detail')">إغلاق</button>
+      <button class="btn-primary" onclick="payFromDetail()"><span data-icon="credit-card"></span> تسجيل دفعة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Day Payments Modal -->
+<div class="modal-overlay" id="modal-day-payments">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="day-modal-title">دفعات اليوم</div>
+      <button class="modal-close" onclick="closeModal('modal-day-payments')"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body" id="day-modal-body"></div>
+  </div>
+</div>
+
+<!-- Revenue Details Modal -->
+<div class="modal-overlay" id="modal-revenue-details">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <div class="modal-title" id="revenue-modal-title">تفاصيل الإيرادات</div>
+      <button class="modal-close" onclick="closeModal('modal-revenue-details')"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body" id="revenue-modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA LAYER
+// ============================================================
+const DB = {
+  get students() { return JSON.parse(localStorage.getItem('ama_students') || '[]'); },
+  set students(v) { localStorage.setItem('ama_students', JSON.stringify(v)); },
+  get payments() { return JSON.parse(localStorage.getItem('ama_payments') || '[]'); },
+  set payments(v) { localStorage.setItem('ama_payments', JSON.stringify(v)); }
+};
+
+
+// ============================================================
+// ICONS
+// ============================================================
+function iconSvg(body) {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${body}</svg>`;
+}
+
+const ICONS = {
+  sparkles: '✨',
+  home: '🏠',
+  users: '👥',
+  coins: '💰',
+  'credit-card': '💳',
+  calendar: '📅',
+  settings: '⚙️',
+  'hand-wave': '👋',
+  bell: '🔔',
+  receipt: '🧾',
+  plus: '➕',
+  list: '📋',
+  chart: '📊',
+  'graduation-cap': '🎓',
+  'check-circle': '✅',
+  clock: '⏰',
+  alert: '⚠️',
+  x: '❌',
+  search: '🔍',
+  trash: '🗑️',
+  download: '⬇️',
+  upload: '⬆️',
+  moon: '🌙',
+  sun: '☀️',
+  dot: '•',
+  'smartphone': '📱',
+  phone: '📞',
+  note: '📝',
+  database: '💾',
+  circle: '⚪',
+  'x-circle': '❌',
+  inbox: '📥',
+  info: 'ℹ️',
+  'chevron-left': '◀',
+  'chevron-right': '▶',
+};
+
+function hydrateIcons(root = document) {
+  root.querySelectorAll('[data-icon]').forEach(el => {
+    if (el.dataset.iconHydrated === '1') return;
+    const name = el.getAttribute('data-icon');
+    const iconData = ICONS[name] || ICONS.dot;
+    el.dataset.iconHydrated = '1';
+    
+    if (iconData.startsWith('<svg')) {
+      const wrap = document.createElement('span');
+      wrap.className = 'icon';
+      wrap.innerHTML = iconData;
+      el.replaceWith(wrap);
+    } else {
+      const text = document.createTextNode(iconData);
+      el.replaceWith(text);
+    }
+  });
+}
+
+const iconObserver = new MutationObserver(mutations => {
+  for (const mut of mutations) {
+    mut.addedNodes.forEach(node => {
+      if (node.nodeType === 1) hydrateIcons(node);
+    });
+  }
+});
+window.addEventListener('DOMContentLoaded', () => {
+  hydrateIcons(document.body);
+  iconObserver.observe(document.body, { childList: true, subtree: true });
+});
+
+// ===== THEME =====
+function toggleTheme(isLight) {
+  if (isLight) {
+    document.documentElement.classList.add('light-mode');
+    localStorage.setItem('ama_theme', 'light');
+    document.getElementById('theme-label').innerHTML = 'فاتح ☀️';
+    document.querySelector('meta[name="theme-color"]').content = '#ede8dc';
+  } else {
+    document.documentElement.classList.remove('light-mode');
+    localStorage.setItem('ama_theme', 'dark');
+    document.getElementById('theme-label').innerHTML = 'داكن 🌙';
+    document.querySelector('meta[name="theme-color"]').content = '#0f1b2d';
+  }
+}
+// Apply saved theme on load
+(function() {
+  const saved = localStorage.getItem('ama_theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light-mode');
+    // Toggle checkbox will be set after DOM ready
+  }
+})();
+
+const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const DAYS_AR = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ============================================================
+// NAV
+// ============================================================
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const page = document.getElementById('page-' + name);
+  const tab = document.getElementById('tab-' + name);
+  if (page) page.classList.add('active');
+  if (tab) tab.classList.add('active');
+  if (name === 'home') renderHome();
+  if (name === 'students') renderStudentsTable();
+  if (name === 'payments') { renderPaymentsTable(); renderMonthSummary(); }
+  if (name === 'calendar') renderCalendar();
+  if (name === 'revenue') {
+    window.__revenueMonthPreset = (typeof calMonth === 'number' ? calMonth + 1 : new Date().getMonth() + 1);
+    renderRevenuePage();
+  }
+  if (name === 'unpaid') renderUnpaidPage();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.innerHTML = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// HOME
+// ============================================================
+
+function renderHome() {
+  const now = new Date();
+  document.getElementById('home-date').textContent =
+    `${DAYS_AR[now.getDay()]}، ${now.getDate()} ${MONTHS_AR[now.getMonth()]} ${now.getFullYear()}`;
+
+  const students = DB.students;
+  const payments = DB.payments;
+  const thisMonth = now.getMonth() + 1;
+  const thisYear = now.getFullYear();
+
+  const monthPayments = payments.filter(p => {
+    const d = new Date(p.date);
+    return d.getMonth() + 1 === thisMonth && d.getFullYear() === thisYear;
+  });
+  const monthTotal = monthPayments.reduce((s, p) => s + p.amount, 0);
+  const totalAll = payments.reduce((s, p) => s + p.amount, 0);
+
+  const paidThisMonth = new Set(
+    payments.filter(p => p.monthCovered == thisMonth && p.yearCovered == thisYear).map(p => p.studentId)
+  );
+  const unpaidStudents = students.filter(s => !paidThisMonth.has(s.id));
+  const unpaidCount = unpaidStudents.length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-tile blue" onclick="goPage('students')">
+      <div class="stat-tile-top">
+        <div class="stat-tile-icon"><span data-icon="graduation-cap"></span></div>
+        <div class="stat-tile-arrow"><span><span data-icon="chevron-left"></span></span></div>
+      </div>
+      <div>
+        <div class="stat-tile-value">${students.length}</div>
+        <div class="stat-tile-label">إجمالي الطلاب</div>
+      </div>
+    </div>
+    <div class="stat-tile green" onclick="goPage('revenue')">
+      <div class="stat-tile-top">
+        <div class="stat-tile-icon">💰</div>
+        <div class="stat-tile-arrow"><span><span data-icon="chevron-left"></span></span></div>
+      </div>
+      <div>
+        <div class="stat-tile-value">${monthTotal.toLocaleString()}</div>
+        <div class="stat-tile-label">إيرادات ${MONTHS_AR[thisMonth-1]}</div>
+      </div>
+    </div>
+    <div class="stat-tile red" onclick="goPage('unpaid')">
+      <div class="stat-tile-top">
+        <div class="stat-tile-icon">⚠️</div>
+        <div class="stat-tile-arrow"><span><span data-icon="chevron-left"></span></span></div>
+      </div>
+      <div>
+        <div class="stat-tile-value">${unpaidCount}</div>
+        <div class="stat-tile-label">لم يدفعوا هذا الشهر</div>
+      </div>
+    </div>
+    <div class="stat-tile gold" onclick="goPage('payments')">
+      <div class="stat-tile-top">
+        <div class="stat-tile-icon">💎</div>
+        <div class="stat-tile-arrow"><span><span data-icon="chevron-left"></span></span></div>
+      </div>
+      <div>
+        <div class="stat-tile-value">${totalAll.toLocaleString()}</div>
+        <div class="stat-tile-label">إجمالي كل الدفعات</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('home-charts').innerHTML = renderHomeCharts(students, payments, thisMonth, thisYear, paidThisMonth);
+
+  const alertsList = document.getElementById('alerts-list');
+  document.getElementById('alerts-count').textContent = unpaidCount ? `(${unpaidCount})` : '';
+  if (!unpaidCount) {
+    alertsList.innerHTML = `<button class="alert-button" onclick="goPage('unpaid')"><div class="alert-item"><div class="alert-icon"><span data-icon="check-circle" style="color:var(--green)"></span></div><div class="alert-text"><h4 style="color:var(--green)">ممتاز!</h4><p>كل الطلاب دفعوا هذا الشهر</p></div></div></button>`;
+  } else {
+    alertsList.innerHTML = `<button class="alert-button" onclick="goPage('unpaid')">
+        <div class="alert-item" style="background:linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05)); border-color:rgba(239,68,68,0.3);">
+          <div class="alert-icon"><span data-icon="alert"></span></div>
+          <div class="alert-text">
+            <h4 style="color:var(--red)">تحذير: تأخير دفع</h4>
+            <p>يوجد ${unpaidCount} طلاب لم يسددوا رسوم هذا الشهر. اضغط هنا لرؤيتهم.</p>
+          </div>
+          <div style="margin-right:auto; color:var(--text-dim); font-size: 20px"><span data-icon="chevron-left"></span></div>
+        </div>
+      </button>`;
+  }
+
+  const recent = [...payments].sort((a,b) => new Date(b.date)-new Date(a.date)).slice(0,8);
+  const tbody = document.getElementById('recent-payments-body');
+  if (!recent.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:32px">لا توجد دفعات بعد</td></tr>`;
+  } else {
+    tbody.innerHTML = recent.map(p => {
+      const s = DB.students.find(x => x.id === p.studentId);
+      return `<tr>
+        <td class="fw-bold">${s ? s.name : '—'}</td>
+        <td class="text-green fw-bold">${p.amount.toLocaleString()} جنيه</td>
+        <td class="text-dim">${formatDate(p.date)}</td>
+        <td><span class="payment-month-badge">${MONTHS_AR[p.monthCovered-1]} ${p.yearCovered}</span></td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function renderHomeCharts(students, payments, thisMonth, thisYear, paidThisMonth) {
+  const totalTarget = students.reduce((sum, s) => sum + (Number(s.fee) || 0), 0);
+  const monthTotal = payments.filter(p => {
+    const d = new Date(p.date);
+    return d.getMonth() + 1 === thisMonth && d.getFullYear() === thisYear;
+  }).reduce((s, p) => s + p.amount, 0);
+  const monthCollection = totalTarget ? Math.round((monthTotal / totalTarget) * 100) : 0;
+  const monthPaidRate = students.length ? Math.round((paidThisMonth.size / students.length) * 100) : 0;
+
+  return `
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">تحصيل الشهر</div>
+          <div class="chart-sub">مقارنة الدفعات الحالية مع الرسوم المتوقعة</div>
+        </div>
+        <div class="metric-value" style="margin-top:0">${monthCollection}%</div>
+      </div>
+      <div class="ring-row">
+        <div class="ring-card">
+          <div class="ring" style="--p:${Math.min(100, monthCollection)}%"><div class="ring-value">${monthCollection}%</div></div>
+          <div class="ring-label">نسبة التحصيل</div>
+        </div>
+        <div class="ring-card">
+          <div class="ring green" style="--p:${Math.min(100, monthPaidRate)}%"><div class="ring-value">${monthPaidRate}%</div></div>
+          <div class="ring-label">الطلاب المسددون</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+function getRevenueFilters() {
+  const month = document.getElementById('revenue-month')?.value || '';
+  const year = document.getElementById('revenue-year')?.value || '';
+  const type = document.getElementById('revenue-type')?.value || '';
+  return { month, year, type };
+}
+
+function getFilteredRevenuePayments() {
+  const { month, year, type } = getRevenueFilters();
+  return DB.payments.map(p => {
+    const student = DB.students.find(s => s.id === p.studentId);
+    return { ...p, student };
+  }).filter(p => {
+    if (month && String(p.monthCovered) !== String(month)) return false;
+    if (year && (!p.student || p.student.year !== year)) return false;
+    if (type && (!p.student || p.student.type !== type)) return false;
+    return true;
+  }).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function ensureRevenueMonthOptions() {
+  const sel = document.getElementById('revenue-month');
+  if (!sel) return;
+  if (sel.options.length === 1) {
+    MONTHS_AR.forEach((m, i) => {
+      const o = document.createElement('option');
+      o.value = String(i + 1);
+      o.textContent = m;
+      sel.appendChild(o);
+    });
+  }
+  if (!sel.value) {
+    const preset = window.__revenueMonthPreset;
+    sel.value = preset ? String(preset) : String(new Date().getMonth() + 1);
+  }
+}
+
+function renderRevenuePage() {
+  ensureRevenueMonthOptions();
+  const payments = getFilteredRevenuePayments();
+  const total = payments.reduce((s, p) => s + p.amount, 0);
+  const count = payments.length;
+  const uniqueStudents = new Set(payments.map(p => p.studentId)).size;
+  const avg = count ? Math.round(total / count) : 0;
+
+  const byYear = {};
+  const byType = {};
+  payments.forEach(p => {
+    const year = p.student?.year || '—';
+    const type = p.student?.type || '—';
+    byYear[year] = (byYear[year] || 0) + p.amount;
+    byType[type] = (byType[type] || 0) + p.amount;
+  });
+
+  const ov = document.getElementById('revenue-overview');
+  if (ov) {
+    ov.innerHTML = `
+      <div class="metric"><div class="metric-label">إجمالي الإيرادات</div><div class="metric-value">${total.toLocaleString()}</div><div class="metric-note">جنيه</div></div>
+      <div class="metric"><div class="metric-label">عدد الدفعات</div><div class="metric-value">${count}</div><div class="metric-note">دفعة</div></div>
+      <div class="metric"><div class="metric-label">عدد الطلاب</div><div class="metric-value">${uniqueStudents}</div><div class="metric-note">طالب مختلف</div></div>
+      <div class="metric"><div class="metric-label">متوسط الدفعة</div><div class="metric-value">${avg.toLocaleString()}</div><div class="metric-note">جنيه</div></div>
+    `;
+  }
+
+  const breakdown = document.getElementById('revenue-breakdown');
+  if (breakdown) {
+    const yearPills = Object.entries(byYear).length
+      ? Object.entries(byYear).map(([k,v]) => `<div class="pill-button"><span>${k}</span><strong>${v.toLocaleString()} ج</strong></div>`).join('')
+      : `<div class="empty-state" style="padding:24px">لا توجد بيانات مطابقة للفلتر</div>`;
+    const typePills = Object.entries(byType).length
+      ? Object.entries(byType).map(([k,v]) => `<div class="pill-button"><span>${k}</span><strong>${v.toLocaleString()} ج</strong></div>`).join('')
+      : '';
+    breakdown.innerHTML = `
+      <div class="revenue-header" style="grid-template-columns: repeat(2, minmax(0,1fr));">
+        <div class="summary-panel">
+          <div class="chart-head"><div><div class="chart-title">حسب السنة</div><div class="chart-sub">تفصيل المبالغ لكل سنة دراسية</div></div></div>
+          <div class="revenue-grid">${yearPills}</div>
+        </div>
+        <div class="summary-panel">
+          <div class="chart-head"><div><div class="chart-title">حسب النوع</div><div class="chart-sub">تفصيل المبالغ لكل نوع</div></div></div>
+          <div class="revenue-grid">${typePills || '<div class="empty-state" style="padding:24px">لا توجد بيانات مطابقة</div>'}</div>
+        </div>
+      </div>
+      <div style="height:14px"></div>
+      <div class="summary-panel">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">أحدث المدفوعات</div>
+            <div class="chart-sub">اضغط تفاصيل لعرض كل المدفوعات المطابقة</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>الطالب</th><th>السنة</th><th>النوع</th><th>المبلغ</th><th>الشهر</th></tr></thead>
+            <tbody id="revenue-preview-body"></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    const preview = document.getElementById('revenue-preview-body');
+    if (preview) {
+      const rows = payments.slice(0, 10);
+      preview.innerHTML = rows.length ? rows.map(p => `
+        <tr>
+          <td class="fw-bold">${p.student?.name || '—'}</td>
+          <td>${p.student?.year || '—'}</td>
+          <td>${p.student?.type || '—'}</td>
+          <td class="text-green fw-bold">${p.amount.toLocaleString()} جنيه</td>
+          <td><span class="payment-month-badge">${MONTHS_AR[p.monthCovered-1]} ${p.yearCovered}</span></td>
+        </tr>
+      `).join('') : `<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:30px">لا توجد دفعات مطابقة</td></tr>`;
+    }
+  }
+}
+
+function openRevenueDetails() {
+  const payments = getFilteredRevenuePayments();
+  const total = payments.reduce((s, p) => s + p.amount, 0);
+  const title = document.getElementById('revenue-modal-title');
+  const body = document.getElementById('revenue-modal-body');
+  if (title) title.textContent = 'تفاصيل الإيرادات';
+  if (!body) return;
+
+  if (!payments.length) {
+    body.innerHTML = `<div class="empty-state" style="padding:32px"><div class="empty-icon"><span data-icon="receipt"></span></div><div class="empty-text">لا توجد مدفوعات مطابقة لهذه الفلاتر</div></div>`;
+  } else {
+    body.innerHTML = `
+      <div class="summary-panel" style="margin-bottom:12px">
+        <div class="chart-head" style="margin-bottom:0">
+          <div>
+            <div class="chart-title">${total.toLocaleString()} جنيه</div>
+            <div class="chart-sub">${payments.length} دفعة مطابقة</div>
+          </div>
+          <div class="metric-note">مرتبة من الأحدث للأقدم</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>الطالب</th><th>السنة</th><th>النوع</th><th>المبلغ</th><th>الشهر</th><th>التاريخ</th><th>ملاحظة</th></tr></thead>
+          <tbody>
+            ${payments.map(p => `
+              <tr>
+                <td class="fw-bold">${p.student?.name || '—'}</td>
+                <td>${p.student?.year || '—'}</td>
+                <td>${p.student?.type || '—'}</td>
+                <td class="text-green fw-bold">${p.amount.toLocaleString()} جنيه</td>
+                <td><span class="payment-month-badge">${MONTHS_AR[p.monthCovered-1]} ${p.yearCovered}</span></td>
+                <td class="text-dim">${formatDate(p.date)}</td>
+                <td class="text-dim">${p.note || '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+  openModal('modal-revenue-details');
+}
+
+function renderUnpaidPage() {
+  const now = new Date();
+  const m = now.getMonth() + 1;
+  const y = now.getFullYear();
+  const students = DB.students;
+  const payments = DB.payments;
+  const paidThisMonth = new Set(
+    payments.filter(p => p.monthCovered == m && p.yearCovered == y).map(p => p.studentId)
+  );
+  const unpaid = students.filter(s => !paidThisMonth.has(s.id));
+  const dueTotal = unpaid.reduce((sum, s) => sum + (Number(s.fee) || 0), 0);
+  const paidCount = students.length - unpaid.length;
+  const paidRate = students.length ? Math.round((paidCount / students.length) * 100) : 0;
+  const overview = document.getElementById('unpaid-overview');
+  if (overview) {
+    overview.innerHTML = `
+      <div class="metric"><div class="metric-label">عدد المتأخرين</div><div class="metric-value">${unpaid.length}</div><div class="metric-note">طالب</div></div>
+      <div class="metric"><div class="metric-label">إجمالي المستحق</div><div class="metric-value">${dueTotal.toLocaleString()}</div><div class="metric-note">جنيه</div></div>
+      <div class="metric"><div class="metric-label">الطلاب المسددون</div><div class="metric-value">${paidCount}</div><div class="metric-note">${paidRate}% من الإجمالي</div></div>
+      <div class="metric"><div class="metric-label">الشهر الحالي</div><div class="metric-value">${MONTHS_AR[m-1]}</div><div class="metric-note">${y}</div></div>
+    `;
+  }
+
+  const tbody = document.getElementById('unpaid-table-body');
+  const empty = document.getElementById('unpaid-empty');
+  if (!tbody || !empty) return;
+
+  if (!unpaid.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = unpaid.map(s => `
+    <tr>
+      <td class="fw-bold">${s.name}</td>
+      <td><span class="badge ${{'الأولى':'badge-year1','الثانية':'badge-year2','الثالثة':'badge-year3'}[s.year] || ''}">${s.year}</span></td>
+      <td><span class="type-badge">${s.type}</span></td>
+      <td class="text-green fw-bold">${s.fee.toLocaleString()} جنيه</td>
+      <td style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm btn-pay" onclick="openPayForStudent('${s.id}')"><span data-icon="credit-card"></span> دفع</button>
+        <button class="btn-sm btn-details" onclick="showStudentDetail('${s.id}')"><span data-icon="list"></span> تفاصيل</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+
+// ============================================================
+// STUDENTS TABLE
+// ============================================================
+function renderStudentsTable() {
+  const search = document.getElementById('search-students').value.toLowerCase();
+  const year = document.getElementById('filter-year').value;
+  const type = document.getElementById('filter-type').value;
+  const status = document.getElementById('filter-status').value;
+
+  let students = DB.students.filter(s => {
+    if (search && !s.name.toLowerCase().includes(search)) return false;
+    if (year && s.year !== year) return false;
+    if (type && s.type !== type) return false;
+    return true;
+  });
+
+  const payments = DB.payments;
+  const now = new Date();
+
+  const tbody = document.getElementById('students-table-body');
+  const empty = document.getElementById('students-empty');
+
+  if (!students.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  let filtered = students.map(s => {
+    const paid = payments.filter(p => p.studentId === s.id).reduce((sum, p) => sum + p.amount, 0);
+    const st = getStudentStatus(s, payments, now);
+    return {...s, paid, status: st};
+  }).filter(s => {
+    if (status === 'paid' && s.status !== 'paid') return false;
+    if (status === 'partial' && s.status !== 'partial') return false;
+    if (status === 'unpaid' && s.status !== 'unpaid') return false;
+    return true;
+  });
+
+  const totalFilteredFee = filtered.reduce((sum, s) => sum + (Number(s.fee) || 0), 0);
+  const totalFilteredPaid = filtered.reduce((sum, s) => sum + (Number(s.paid) || 0), 0);
+
+  // If we filtered by year or type, show a quick pill above the table to summarize that group.
+  let summaryHTML = '';
+  if (year || type || search || status) {
+    summaryHTML = `
+      <tr>
+        <td colspan="8" style="background:rgba(201,150,58,0.1); text-align:center;">
+          <strong style="color:var(--gold);">إجمالي هذه المجموعة:</strong> 
+          ${filtered.length} طلاب · إجمالي الشهرية: <span class="text-green">${totalFilteredFee.toLocaleString()} ج</span>
+          · المتحصل الفعلي كل الأوقات: <span class="text-green">${totalFilteredPaid.toLocaleString()} ج</span>
+        </td>
+      </tr>
+    `;
+  }
+  
+  tbody.innerHTML = summaryHTML + filtered.map((s, i) => {
+    const yearBadge = {'الأولى':'badge-year1','الثانية':'badge-year2','الثالثة':'badge-year3'}[s.year] || '';
+    const statusBadge = s.status === 'paid' ? '<span class="badge badge-paid"><span data-icon="check-circle"></span> مدفوع</span>' :
+                        s.status === 'partial' ? '<span class="badge badge-partial"><span data-icon="dot"></span> جزئي</span>' :
+                        '<span class="badge badge-unpaid"><span data-icon="x-circle"></span> غير مدفوع</span>';
+    return `<tr>
+      <td class="text-dim">${i+1}</td>
+      <td class="fw-bold">${s.name}</td>
+      <td><span class="badge ${yearBadge}">${s.year}</span></td>
+      <td><span class="type-badge">${s.type}</span></td>
+      <td class="text-green fw-bold">${s.paid.toLocaleString()} جنيه</td>
+      <td>${s.fee} جنيه/شهر</td>
+      <td>${statusBadge}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm btn-details" onclick="showStudentDetail('${s.id}')">تفاصيل</button>
+        <button class="btn-sm btn-pay" onclick="openPayForStudent('${s.id}')"><span data-icon="credit-card"></span> دفع</button>
+        <button class="btn-sm btn-danger" onclick="deleteStudent('${s.id}')"><span data-icon="trash"></span></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function getStudentStatus(s, payments, now) {
+  const m = now.getMonth() + 1, y = now.getFullYear();
+  const paidThis = payments.filter(p => p.studentId === s.id && p.monthCovered == m && p.yearCovered == y);
+  const total = paidThis.reduce((sum, p) => sum + p.amount, 0);
+  if (total >= s.fee) return 'paid';
+  if (total > 0) return 'partial';
+  return 'unpaid';
+}
+
+function deleteStudent(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا الطالب وكل دفعاته؟')) return;
+  DB.students = DB.students.filter(s => s.id !== id);
+  DB.payments = DB.payments.filter(p => p.studentId !== id);
+  renderStudentsTable();
+  toast('تم حذف الطالب');
+}
+
+// ============================================================
+// STUDENT DETAIL
+// ============================================================
+let detailStudentId = null;
+function showStudentDetail(id) {
+  detailStudentId = id;
+  const s = DB.students.find(x => x.id === id);
+  if (!s) return;
+  const payments = DB.payments.filter(p => p.studentId === id).sort((a,b) => new Date(b.date)-new Date(a.date));
+  const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+  const initials = s.name.split(' ').slice(0,2).map(w => w[0]).join('');
+
+  const now = new Date();
+  const monthsActive = Math.max(1, Math.round((now - new Date(s.createdAt || now)) / (1000*60*60*24*30)));
+  const expected = s.fee * monthsActive;
+  const progress = Math.min(100, Math.round((totalPaid / Math.max(expected, s.fee)) * 100));
+
+  document.getElementById('detail-title').textContent = `تفاصيل الطالب`;
+  document.getElementById('detail-body').innerHTML = `
+    <div class="student-detail-header">
+      <div class="student-avatar">${initials}</div>
+      <div class="student-info-big">
+        <h2>${s.name}</h2>
+        <p>${s.year} · ${s.type} · ${s.fee} جنيه/شهر${s.phone ? ' · <span data-icon="phone"></span> '+s.phone : ''}</p>
+        ${s.notes ? `<p class="mt-8 text-dim"><span data-icon="note"></span> ${s.notes}</p>` : ''}
+      </div>
+    </div>
+
+    <div class="month-cards" style="align-items:center;">
+      <div style="display:flex; flex-direction:column; gap:12px; flex:1;">
+        <div class="month-card" style="margin:0;">
+          <div class="month-card-value text-green">${totalPaid.toLocaleString()}</div>
+          <div class="month-card-label">إجمالي المدفوع (جنيه)</div>
+        </div>
+        <div class="month-card" style="margin:0;">
+          <div class="month-card-value text-gold">${payments.length}</div>
+          <div class="month-card-label">عدد الدفعات</div>
+        </div>
+      </div>
+      <div class="ring-card" style="padding: 16px;">
+        <div class="ring ${progress>=100?'green':''}" style="--p:${Math.min(100, progress)}%"><div class="ring-value">${progress}%</div></div>
+        <div class="ring-label">نسبة الالتزام</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-title" style="margin-bottom:16px"><span data-icon="list"></span> تاريخ الدفعات</div>
+    ${payments.length ? `
+    <div class="payment-timeline">
+      ${payments.map(p => `
+        <div class="payment-item">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+              <span class="payment-amount">+${p.amount.toLocaleString()} جنيه</span>
+              <span class="payment-month-badge">${MONTHS_AR[p.monthCovered-1]} ${p.yearCovered}</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-dim)">${formatDate(p.date)}${p.note ? ' · '+p.note : ''}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn-sm btn-secondary" onclick="openAddPayment('${p.id}')">✏️</button>
+            <button class="btn-sm btn-danger" onclick="deletePayment('${p.id}','${id}')"><span data-icon="trash"></span></button>
+          </div>
+        </div>
+      `).join('')}
+    </div>` : '<div class="empty-state" style="padding:32px"><div class="empty-icon"><span data-icon="receipt"></span></div><div class="empty-text">لا توجد دفعات</div></div>'}
+  `;
+  openModal('modal-student-detail');
+}
+
+function payFromDetail() {
+  closeModal('modal-student-detail');
+  setTimeout(() => openPayForStudent(detailStudentId), 300);
+}
+
+function deletePayment(payId, studentId) {
+  if (!confirm('حذف هذه الدفعة؟')) return;
+  DB.payments = DB.payments.filter(p => p.id !== payId);
+  showStudentDetail(studentId);
+  toast('تم حذف الدفعة');
+}
+
+// ============================================================
+// PAYMENTS TABLE
+// ============================================================
+function renderPaymentsTable() {
+  const search = document.getElementById('search-payments').value.toLowerCase();
+  const monthF = document.getElementById('filter-pay-month').value;
+  const yearF = document.getElementById('filter-pay-year-f').value;
+
+  const students = DB.students;
+  let payments = DB.payments.map(p => {
+    const s = students.find(x => x.id === p.studentId);
+    return {...p, studentName: s ? s.name : '—', studentYear: s ? s.year : '', studentType: s ? s.type : ''};
+  }).filter(p => {
+    if (search && !p.studentName.toLowerCase().includes(search)) return false;
+    if (monthF && String(p.monthCovered) !== monthF) return false;
+    if (yearF && p.studentYear !== yearF) return false;
+    return true;
+  }).sort((a,b) => new Date(b.date)-new Date(a.date));
+
+  const tbody = document.getElementById('payments-table-body');
+  const empty = document.getElementById('payments-empty');
+
+  if (!payments.length) {
+    tbody.innerHTML = ''; empty.style.display = ''; return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = payments.map(p => `
+    <tr>
+      <td class="fw-bold">${p.studentName}</td>
+      <td><span class="badge ${{'الأولى':'badge-year1','الثانية':'badge-year2','الثالثة':'badge-year3'}[p.studentYear]||''}">${p.studentYear}</span></td>
+      <td><span class="type-badge">${p.studentType}</span></td>
+      <td class="text-green fw-bold">${p.amount.toLocaleString()} جنيه</td>
+      <td><span class="payment-month-badge">${MONTHS_AR[p.monthCovered-1]} ${p.yearCovered}</span></td>
+      <td class="text-dim">${formatDate(p.date)}</td>
+      <td class="text-dim">${p.note || '—'}</td>
+      <td style="white-space:nowrap; display:flex; gap:6px; border-bottom:none">
+        <button class="btn-sm btn-secondary" onclick="openAddPayment('${p.id}')">✏️</button>
+        <button class="btn-sm btn-danger" onclick="deletePaymentDirect('${p.id}')"><span data-icon="trash"></span></button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deletePaymentDirect(id) {
+  if (!confirm('حذف هذه الدفعة؟')) return;
+  DB.payments = DB.payments.filter(p => p.id !== id);
+  renderPaymentsTable(); renderMonthSummary();
+  toast('تم حذف الدفعة');
+}
+
+function renderMonthSummary() {
+  const now = new Date();
+  const m = now.getMonth() + 1, y = now.getFullYear();
+  const payments = DB.payments;
+  const thisMonth = payments.filter(p => p.monthCovered == m && p.yearCovered == y);
+  const lastMonth = payments.filter(p => {
+    const lm = m === 1 ? 12 : m-1, ly = m === 1 ? y-1 : y;
+    return p.monthCovered == lm && p.yearCovered == ly;
+  });
+  const thisTotal = thisMonth.reduce((s,p) => s+p.amount, 0);
+  const lastTotal = lastMonth.reduce((s,p) => s+p.amount, 0);
+
+  document.getElementById('month-summary').innerHTML = `
+    <div class="month-card">
+      <div class="month-card-value text-green">${thisTotal.toLocaleString()}</div>
+      <div class="month-card-label">إيرادات ${MONTHS_AR[m-1]} (جنيه)</div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-value text-gold">${lastTotal.toLocaleString()}</div>
+      <div class="month-card-label">إيرادات ${MONTHS_AR[m===1?11:m-2]} (جنيه)</div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-value text-gold">${thisMonth.length}</div>
+      <div class="month-card-label">دفعات هذا الشهر</div>
+    </div>
+    <div class="month-card">
+      <div class="month-card-value">${payments.reduce((s,p)=>s+p.amount,0).toLocaleString()}</div>
+      <div class="month-card-label">الإجمالي الكلي (جنيه)</div>
+    </div>
+  `;
+
+  // populate month filter
+  const sel = document.getElementById('filter-pay-month');
+  if (sel.options.length === 1) {
+    MONTHS_AR.forEach((m,i) => { const o = document.createElement('option'); o.value=i+1; o.textContent=m; sel.appendChild(o); });
+  }
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+let calYear, calMonth;
+function renderCalendar() {
+  const now = new Date();
+  if (!calYear) { calYear = now.getFullYear(); calMonth = now.getMonth(); }
+  document.getElementById('cal-title').textContent = `${MONTHS_AR[calMonth]} ${calYear}`;
+
+  const grid = document.getElementById('cal-grid');
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  let html = dayNames.map(d => `<div class="cal-day-name">${d.slice(0,1)}</div>`).join('');
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+
+  const payments = DB.payments;
+  const payDays = {};
+  payments.forEach(p => {
+    if (!p.date) return;
+    const parts = p.date.split('-');
+    if (parts.length === 3) {
+      if (parseInt(parts[0]) === calYear && parseInt(parts[1]) === calMonth + 1) {
+        const day = parseInt(parts[2]);
+        payDays[day] = (payDays[day] || 0) + p.amount;
+      }
+    }
+  });
+
+  // prev month filler
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month">${daysInPrev - i}</div>`;
+  }
+
+  const today = now.getDate(), todayMonth = now.getMonth(), todayYear = now.getFullYear();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today && calMonth === todayMonth && calYear === todayYear;
+    const hasPay = payDays[d];
+    html += `<div class="cal-day ${isToday?'today':''} ${hasPay?'has-payments':''}" onclick="showDayPayments(${d})">
+      <span>${d}</span>
+      ${hasPay ? `<span style="font-size:9px;color:var(--green)">${hasPay >= 1000 ? (hasPay/1000).toFixed(1)+'k' : hasPay}</span>` : ''}
+    </div>`;
+  }
+
+  // fill remaining
+  const total = firstDay + daysInMonth;
+  const nextDays = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= nextDays; i++) {
+    html += `<div class="cal-day other-month">${i}</div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth=11; calYear--; } renderCalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth=0; calYear++; } renderCalendar(); }
+
+function showDayPayments(day) {
+  const dayPayments = DB.payments.filter(p => {
+    if (!p.date) return false;
+    const parts = p.date.split('-');
+    if (parts.length === 3) {
+      return parseInt(parts[0]) === calYear && parseInt(parts[1]) === calMonth + 1 && parseInt(parts[2]) === day;
+    }
+    return false;
+  });
+  const students = DB.students;
+
+  document.getElementById('day-modal-title').innerHTML = `<span data-icon="coins"></span> دفعات ${day} ${MONTHS_AR[calMonth]} ${calYear}`;
+
+  if (!dayPayments.length) {
+    document.getElementById('day-modal-body').innerHTML = `
+      <div class="empty-state" style="padding:32px">
+        <div class="empty-icon"><span data-icon="inbox"></span></div>
+        <div class="empty-text">لا توجد دفعات في هذا اليوم</div>
+      </div>`;
+  } else {
+    const total = dayPayments.reduce((s,p) => s+p.amount, 0);
+    document.getElementById('day-modal-body').innerHTML = `
+      <div style="background:rgba(45,189,126,0.1);border-radius:14px;padding:16px;margin-bottom:16px;text-align:center">
+        <div style="font-size:28px;font-weight:900;color:var(--green)">${total.toLocaleString()} جنيه</div>
+        <div style="font-size:13px;color:var(--text-dim)">إجمالي اليوم</div>
+      </div>
+      <div class="payment-timeline">
+        ${dayPayments.map(p => {
+          const s = students.find(x => x.id === p.studentId);
+          return `<div class="payment-item">
+            <div style="flex:1">
+              <div style="font-weight:700">${s ? s.name : '—'}</div>
+              <div style="font-size:12px;color:var(--text-dim)">${s ? s.year+' · '+s.type : ''}</div>
+            </div>
+            <div style="text-align:left">
+              <div class="payment-amount">+${p.amount.toLocaleString()} جنيه</div>
+              <span class="payment-month-badge">${MONTHS_AR[p.monthCovered-1]}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+  openModal('modal-day-payments');
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) closeModal(this.id);
+  });
+});
+
+// ============================================================
+// ADD STUDENT
+// ============================================================
+function openAddStudent() {
+  document.getElementById('student-name').value = '';
+  document.getElementById('student-fee').value = '';
+  document.getElementById('student-phone').value = '';
+  document.getElementById('student-notes').value = '';
+  document.querySelectorAll('#year-chips .chip, #type-chips .chip').forEach(c => c.classList.remove('selected'));
+  openModal('modal-add-student');
+}
+
+function selectChip(groupId, el, val) {
+  document.querySelectorAll(`#${groupId} .chip`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  el.dataset.val = val;
+}
+
+function getChipVal(groupId) {
+  const sel = document.querySelector(`#${groupId} .chip.selected`);
+  return sel ? sel.textContent.trim() : null;
+}
+
+function saveStudent() {
+  const name = document.getElementById('student-name').value.trim();
+  const year = getChipVal('year-chips');
+  const type = getChipVal('type-chips');
+  const fee = parseInt(document.getElementById('student-fee').value);
+  const phone = document.getElementById('student-phone').value.trim();
+  const notes = document.getElementById('student-notes').value.trim();
+
+  if (!name) { toast('<span data-icon="x-circle"></span> اكتب اسم الطالب'); return; }
+  if (!year) { toast('<span data-icon="x-circle"></span> اختر السنة الدراسية'); return; }
+  if (!type) { toast('<span data-icon="x-circle"></span> اختر نوع الطالب'); return; }
+  if (!fee || fee <= 0) { toast('<span data-icon="x-circle"></span> اكتب الرسوم الشهرية'); return; }
+
+  const students = DB.students;
+  const dup = students.find(s => s.name === name && s.year === year && s.type === type);
+  if (dup) { toast('<span data-icon="alert"></span> الطالب مسجل بالفعل'); return; }
+
+  students.push({ id: uid(), name, year, type, fee, phone, notes, createdAt: new Date().toISOString() });
+  DB.students = students;
+
+  closeModal('modal-add-student');
+  toast(`<span data-icon="check-circle"></span> تم تسجيل ${name}`);
+  renderStudentsTable();
+  renderHome();
+}
+
+// ============================================================
+// ADD / EDIT PAYMENT
+// ============================================================
+let editingPaymentId = null;
+function openAddPayment(paymentId = null) {
+  const now = new Date();
+  editingPaymentId = typeof paymentId === 'string' ? paymentId : null;
+  
+  if (editingPaymentId) {
+    const p = DB.payments.find(x => x.id === editingPaymentId);
+    if (p) {
+      document.getElementById('pay-student-id').value = p.studentId;
+      const s = DB.students.find(x => x.id === p.studentId);
+      document.getElementById('pay-student-search').value = s ? s.name : '';
+      document.getElementById('pay-student-dropdown').style.display = 'none';
+      document.getElementById('pay-amount').value = p.amount;
+      document.getElementById('pay-date').value = p.date;
+      document.getElementById('pay-month-covered').value = p.monthCovered;
+      document.getElementById('pay-note').value = p.note || '';
+      const sel = document.getElementById('pay-student-selected');
+      sel.style.display = 'block';
+      if(s) sel.innerHTML = `<div style="font-weight:700">${s.name}</div><div style="font-size:12px;color:var(--text-dim)">${s.year} · ${s.type} · ${s.fee} جنيه/شهر</div>`;
+      
+      const yearSel = document.getElementById('pay-year-covered');
+      yearSel.innerHTML = '';
+      for (let y = now.getFullYear(); y >= now.getFullYear() - 2; y--) {
+        const o = document.createElement('option'); o.value = y; o.textContent = y; yearSel.appendChild(o);
+      }
+      yearSel.value = p.yearCovered;
+      openModal('modal-add-payment');
+      return;
+    }
+  }
+
+  document.getElementById('pay-student-search').value = '';
+  document.getElementById('pay-student-id').value = '';
+  document.getElementById('pay-student-selected').style.display = 'none';
+  document.getElementById('pay-student-dropdown').style.display = 'none';
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-note').value = '';
+
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  document.getElementById('pay-date').value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('pay-month-covered').value = now.getMonth() + 1;
+
+  const yearSel = document.getElementById('pay-year-covered');
+  yearSel.innerHTML = '';
+  for (let y = now.getFullYear(); y >= now.getFullYear() - 2; y--) {
+    const o = document.createElement('option'); o.value = y; o.textContent = y; yearSel.appendChild(o);
+  }
+
+  openModal('modal-add-payment');
+}
+
+function openPayForStudent(studentId) {
+  openAddPayment();
+  const s = DB.students.find(x => x.id === studentId);
+  if (!s) return;
+  document.getElementById('pay-student-id').value = s.id;
+  document.getElementById('pay-student-search').value = s.name;
+  document.getElementById('pay-amount').value = s.fee;
+  document.getElementById('pay-student-selected').style.display = 'block';
+  document.getElementById('pay-student-selected').innerHTML = `
+    <div style="font-weight:700">${s.name}</div>
+    <div style="font-size:12px;color:var(--text-dim)">${s.year} · ${s.type} · ${s.fee} جنيه/شهر</div>
+  `;
+}
+
+function filterPayStudents() {
+  const val = document.getElementById('pay-student-search').value.toLowerCase();
+  const dd = document.getElementById('pay-student-dropdown');
+  if (!val) { dd.style.display = 'none'; return; }
+  const students = DB.students.filter(s => s.name.toLowerCase().includes(val));
+  if (!students.length) { dd.style.display = 'none'; return; }
+  dd.style.display = 'block';
+  dd.innerHTML = students.map(s => `
+    <div style="padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.2s"
+      onmouseover="this.style.background='rgba(201,150,58,0.1)'"
+      onmouseout="this.style.background=''"
+      onclick="selectPayStudent('${s.id}')">
+      <div style="font-weight:700">${s.name}</div>
+      <div style="font-size:12px;color:var(--text-dim)">${s.year} · ${s.type} · ${s.fee} جنيه/شهر</div>
+    </div>
+  `).join('');
+}
+
+function selectPayStudent(id) {
+  const s = DB.students.find(x => x.id === id);
+  document.getElementById('pay-student-id').value = id;
+  document.getElementById('pay-student-search').value = s.name;
+  document.getElementById('pay-student-dropdown').style.display = 'none';
+  document.getElementById('pay-amount').value = s.fee;
+  const sel = document.getElementById('pay-student-selected');
+  sel.style.display = 'block';
+  sel.innerHTML = `<div style="font-weight:700">${s.name}</div>
+    <div style="font-size:12px;color:var(--text-dim)">${s.year} · ${s.type} · ${s.fee} جنيه/شهر</div>`;
+}
+
+function savePayment() {
+  const studentId = document.getElementById('pay-student-id').value;
+  const amount = parseInt(document.getElementById('pay-amount').value);
+  const date = document.getElementById('pay-date').value;
+  const monthCovered = parseInt(document.getElementById('pay-month-covered').value);
+  const yearCovered = parseInt(document.getElementById('pay-year-covered').value);
+  const note = document.getElementById('pay-note').value.trim();
+
+  if (!studentId) { toast('<span data-icon="x-circle"></span> اختر الطالب'); return; }
+  if (!amount || amount <= 0) { toast('<span data-icon="x-circle"></span> اكتب المبلغ'); return; }
+  if (!date) { toast('<span data-icon="x-circle"></span> اختر تاريخ الدفع'); return; }
+
+  const payments = DB.payments;
+  if (editingPaymentId) {
+    const idx = payments.findIndex(p => p.id === editingPaymentId);
+    if (idx !== -1) {
+      payments[idx] = { ...payments[idx], studentId, amount, date, monthCovered, yearCovered, note };
+    }
+    editingPaymentId = null;
+    toast(`<span data-icon="check-circle"></span> تم تعديل الدفعة`);
+  } else {
+    payments.push({ id: uid(), studentId, amount, date, monthCovered, yearCovered, note, createdAt: new Date().toISOString() });
+    const s = DB.students.find(x => x.id === studentId);
+    toast(`<span data-icon="check-circle"></span> تم تسجيل دفعة ${s ? s.name : ''}`);
+  }
+  
+  DB.payments = payments;
+  closeModal('modal-add-payment');
+  renderHome();
+  renderStudentsTable();
+  renderPaymentsTable();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return `${d.getDate()} ${MONTHS_AR[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+let deferredPrompt = null;
+
+// Check if already installed as PWA
+function checkInstalled() {
+  const btn = document.getElementById('install-btn');
+  if (!btn) return;
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    btn.disabled = true;
+    btn.innerHTML = '<span data-icon="check-circle"></span> مثبت';
+  }
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('install-btn');
+  if (btn && !window.matchMedia('(display-mode: standalone)').matches) {
+    btn.disabled = false;
+    btn.innerHTML = '<span data-icon="smartphone"></span> تثبيت الآن';
+  }
+});
+
+function installApp() {
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    toast('<span data-icon="check-circle"></span> التطبيق مثبت بالفعل على شاشتك!'); return;
+  }
+  if (!deferredPrompt) {
+    toast('افتح الموقع في Chrome أو Safari وادوس "إضافة للشاشة الرئيسية"'); return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r => {
+    if (r.outcome === 'accepted') toast('<span data-icon="check-circle"></span> جاري تثبيت التطبيق!');
+    else toast('تم إلغاء التثبيت');
+    deferredPrompt = null;
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  toast('<span data-icon="sparkles"></span> تم تثبيت التطبيق بنجاح!');
+  document.getElementById('install-btn').disabled = true;
+  document.getElementById('install-btn').textContent = '<span data-icon="check-circle"></span> مثبت';
+});
+
+function exportData() {
+  const data = { students: DB.students, payments: DB.payments, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `استاذ_عبدالمقصود_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  toast('<span data-icon="check-circle"></span> تم تصدير البيانات');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!confirm(`هل تريد استيراد ${data.students?.length||0} طالب و ${data.payments?.length||0} دفعة؟ سيتم دمج البيانات.`)) return;
+      const existingStudents = DB.students;
+      const existingPayments = DB.payments;
+      const existingIds = new Set(existingStudents.map(s => s.id));
+      (data.students||[]).forEach(s => { if (!existingIds.has(s.id)) existingStudents.push(s); });
+      const existingPayIds = new Set(existingPayments.map(p => p.id));
+      (data.payments||[]).forEach(p => { if (!existingPayIds.has(p.id)) existingPayments.push(p); });
+      DB.students = existingStudents;
+      DB.payments = existingPayments;
+      renderHome();
+      toast('<span data-icon="check-circle"></span> تم استيراد البيانات بنجاح');
+    } catch { toast('<span data-icon="x-circle"></span> ملف غير صحيح'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function clearAllData() {
+  if (!confirm('هل أنت متأكد تماماً؟ سيتم حذف كل البيانات نهائياً ولا يمكن التراجع!')) return;
+  if (!confirm('مرة تانية - هتحذف كل الطلاب والدفعات؟')) return;
+  localStorage.removeItem('ama_students');
+  localStorage.removeItem('ama_payments');
+  renderHome();
+  renderStudentsTable();
+  toast('<span data-icon="trash"></span> تم مسح كل البيانات');
+}
+
+// ============================================================
+// SERVICE WORKER
+// ============================================================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  // Apply saved theme to toggle UI
+  if (localStorage.getItem('ama_theme') === 'light') {
+    const tog = document.getElementById('theme-toggle');
+    if (tog) { tog.checked = true; }
+    document.getElementById('theme-label').innerHTML = 'فاتح ☀️';
+    document.querySelector('meta[name="theme-color"]').content = '#ede8dc';
+  }
+
+  // Check if already installed
+  checkInstalled();
+
+  // Splash
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hidden');
+    renderHome();
+  }, 2000);
+
+  // Sample data for demo if empty
+  if (!DB.students.length) {
+    const sampleStudents = [
+      {id:'s1',name:'أحمد محمد',year:'الأولى',type:'عمال',fee:200,phone:'01012345678',notes:'',createdAt:'2025-09-01'},
+      {id:'s2',name:'محمود علي',year:'الثانية',type:'نظامي',fee:250,phone:'',notes:'',createdAt:'2025-09-01'},
+      {id:'s3',name:'كريم حسن',year:'الأولى',type:'جدارات',fee:200,phone:'',notes:'',createdAt:'2025-09-01'},
+      {id:'s4',name:'يوسف إبراهيم',year:'الثالثة',type:'خدمات',fee:300,phone:'',notes:'',createdAt:'2025-09-01'},
+    ];
+    const now = new Date();
+    const m = now.getMonth()+1, y = now.getFullYear();
+    const samplePayments = [
+      {id:'p1',studentId:'s1',amount:200,date:now.toISOString().split('T')[0],monthCovered:m,yearCovered:y,note:'',createdAt:now.toISOString()},
+      {id:'p2',studentId:'s2',amount:250,date:now.toISOString().split('T')[0],monthCovered:m,yearCovered:y,note:'',createdAt:now.toISOString()},
+      {id:'p3',studentId:'s2',amount:250,date:now.toISOString().split('T')[0],monthCovered:m===1?12:m-1,yearCovered:m===1?y-1:y,note:'شهر سابق',createdAt:now.toISOString()},
+    ];
+    DB.students = sampleStudents;
+    DB.payments = samplePayments;
+  }
+});
+</script>
+</body>
+</html>

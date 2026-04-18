@@ -1,0 +1,17 @@
+{
+  "name": "نظملي",
+  "short_name": "نظملي",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#060d1a",
+  "theme_color": "#060d1a",
+  "description": "نظام متابعة الطلاب - أ\u002e عبدالمقصود",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
